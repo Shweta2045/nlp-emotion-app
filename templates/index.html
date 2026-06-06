@@ -4,33 +4,232 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NLP Emotion & Sentiment Detector</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f6f9; margin: 0; padding: 40px; display: flex; justify-content: center; }
-        .container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 600px; }
-        h2 { color: #333; margin-bottom: 20px; text-align: center; }
-        textarea { width: 100%; height: 100px; padding: 12px; border: 2px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; resize: none; }
-        button { width: 100%; background: #4F46E5; color: white; border: none; padding: 12px; font-size: 16px; border-radius: 8px; cursor: pointer; margin-top: 15px; font-weight: bold; }
-        button:hover { background: #4338CA; }
-        .result-box { margin-top: 30px; padding: 20px; background: #EEF2FF; border-left: 5px solid #4F46E5; border-radius: 4px; }
-        .metric { font-size: 18px; margin: 10px 0; color: #1E1B4B; }
-        .score { font-weight: bold; color: #4F46E5; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            /* Modern, soft gradient background */
+            background: linear-gradient(135deg, #f5f7ff 0%, #e4ecf7 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center; /* This fixes the floating-at-the-top bug */
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(79, 70, 229, 0.08), 0 1px 3px rgba(0, 0, 0, 0.02);
+            width: 100%;
+            max-width: 650px;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header .icon-box {
+            background: #eef2ff;
+            color: #4f46e5;
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px auto;
+            font-size: 24px;
+            box-shadow: inset 0 2px 4px rgba(79, 70, 229, 0.1);
+        }
+
+        h2 {
+            color: #1e1b4b;
+            font-size: 26px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+            color: #64748b;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        .form-group {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 130px;
+            padding: 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            font-size: 15px;
+            font-family: inherit;
+            color: #334155;
+            resize: none;
+            outline: none;
+            transition: all 0.2s ease;
+            background: #f8fafc;
+        }
+
+        textarea:focus {
+            border-color: #4f46e5;
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.15);
+        }
+
+        button {
+            width: 100%;
+            background: #4f46e5;
+            color: white;
+            border: none;
+            padding: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+        }
+
+        button:hover {
+            background: #4338ca;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(79, 70, 229, 0.35);
+        }
+
+        button:active {
+            transform: translateY(1px);
+        }
+
+        /* Results Dashboard UI */
+        .result-box {
+            margin-top: 35px;
+            padding: 25px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 18px;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1e1b4b;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .metric-card {
+            background: white;
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid #f1f5f9;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        .metric-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+
+        .metric-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #4f46e5;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .confidence {
+            font-size: 12px;
+            font-weight: 500;
+            color: #94a3b8;
+            margin-top: 4px;
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>Text Emotion & Sentiment Analyzer</h2>
+    <div class="header">
+        <div class="icon-box">
+            <i class="fa-solid fa-brain"></i>
+        </div>
+        <h2>Text Emotion & Sentiment</h2>
+        <p class="subtitle">AI-powered Natural Language Processing Insights</p>
+    </div>
     
     <form method="POST">
-        <textarea name="user_text" placeholder="Apna sentence yahan likhein... (e.g., I am happy because today is my birthday)" required>{{ result.text if result else '' }}</textarea>
-        <button type="submit">Analyze Text</button>
+        <div class="form-group">
+            <textarea name="user_text" placeholder="Apna sentence yahan likhein... (e.g., I am happy because today is my birthday)" required>{{ result.text if result else '' }}</textarea>
+        </div>
+        <button type="submit">
+            <i class="fa-solid fa-wand-magic-sparkles"></i> Analyze Text
+        </button>
     </form>
 
     {% if result %}
     <div class="result-box">
-        <h3>Analysis Results:</h3>
-        <div class="metric">Sentiment: <span class="score">{{ result.sentiment }}</span> ({{ result.sentiment_conf }})</div>
-        <div class="metric">Emotion: <span class="score">{{ result.emotion }}</span> ({{ result.emotion_conf }})</div>
+        <div class="result-title">
+            <i class="fa-solid fa-chart-simple" style="color: #4f46e5;"></i> Analysis Results
+        </div>
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-label">Sentiment</div>
+                <div class="metric-value">
+                    {{ result.sentiment }}
+                    <span class="confidence">Confidence: {{ result.sentiment_conf }}</span>
+                </div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Detected Emotion</div>
+                <div class="metric-value">
+                    {{ result.emotion }}
+                    <span class="confidence">Confidence: {{ result.emotion_conf }}</span>
+                </div>
+            </div>
+        </div>
     </div>
     {% endif %}
 </div>
